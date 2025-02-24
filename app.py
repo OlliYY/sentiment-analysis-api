@@ -4,8 +4,8 @@ import pickle
 
 app = Flask(__name__)
 
-# Allow only your React app URL to access the API
-CORS(app, resources={r"/*": {"origins": "https://your-react-app.vercel.app"}})
+# Allow ALL origins (for debugging, later we can restrict this)
+CORS(app)
 
 # Load model and vectorizer
 with open("sentiment_model.pkl", "rb") as model_file:
