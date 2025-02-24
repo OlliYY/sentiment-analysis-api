@@ -3,9 +3,7 @@ from flask_cors import CORS
 import pickle
 
 app = Flask(__name__)
-
-# Allow ALL origins (for debugging, later we can restrict this)
-CORS(app)
+CORS(app)  # Automatically handle CORS
 
 # Load model and vectorizer
 with open("sentiment_model.pkl", "rb") as model_file:
@@ -20,7 +18,23 @@ def analyze_sentiment():
     text = data.get("text")
     transformed_text = vectorizer.transform([text])
     prediction = model.predict(transformed_text)[0]
-    return jsonify({"sentiment": int(prediction)})
+    
+    # Manually add CORS headers to the response
+    response = jsonify({"sentiment": int(prediction)})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+    response.headers.add("Access-Control-Allow-Methods", "POST")
+    
+    return response
+
+# Handle OPTIONS preflight requests
+@app.route("/analyze", methods=["OPTIONS"])
+def handle_options():
+    response = jsonify({"message": "CORS preflight handled"})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+    response.headers.add("Access-Control-Allow-Methods", "POST")
+    return response
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
